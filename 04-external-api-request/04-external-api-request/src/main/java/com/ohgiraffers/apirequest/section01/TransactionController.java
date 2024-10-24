@@ -43,7 +43,7 @@ public class TransactionController {
     public ResponseDTO translateByRestTemplate(@RequestBody RequestDTO requestDTO){
 
         log.info("번역[RestTemplate] Controller 요청 들어옴...");
-        log.info("text: {}, lang: {}", requestDTO.getText(), requestDTO.getLang());
+        log.info("text: {}", requestDTO.getText());
 
         ResponseDTO result = restTemplateService.translateText(requestDTO);
 
@@ -54,7 +54,7 @@ public class TransactionController {
     public ResponseDTO translateByWebClient(@RequestBody RequestDTO requestDTO){
 
         log.info("번역[WebClient] Controller 요청 들어옴...");
-        log.info("text: {}, lang: {}", requestDTO.getText(), requestDTO.getLang());
+        log.info("text: {}", requestDTO.getText());
 
         ResponseDTO result = webClientService.translateText(requestDTO);
 

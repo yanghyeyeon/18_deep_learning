@@ -10,5 +10,6 @@ import lombok.*;
 @ToString
 public class ResponseDTO {
 
-    private String result;
+    private String summary;
+    private String sentiment;
 }

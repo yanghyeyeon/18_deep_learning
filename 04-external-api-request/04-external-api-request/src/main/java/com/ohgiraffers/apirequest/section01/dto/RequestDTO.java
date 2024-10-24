@@ -12,5 +12,5 @@ import lombok.Setter;
 public class RequestDTO {
 
     private String text;
-    private String lang;
+//    private String lang;
 }

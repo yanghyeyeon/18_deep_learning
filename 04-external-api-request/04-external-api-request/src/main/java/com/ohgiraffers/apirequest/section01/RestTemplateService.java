@@ -28,7 +28,7 @@ public class RestTemplateService {
     private final RestTemplate restTemplate;
 
     // 요청보내 URL
-    private final String FAST_API_SERVER_URL = "http://localhost:8000/translate";
+    private final String FAST_API_SERVER_URL = "http://localhost:8000/analyze-and-summarize";
 
     public RestTemplateService(RestTemplate restTemplate) {
         this.restTemplate = new RestTemplate();

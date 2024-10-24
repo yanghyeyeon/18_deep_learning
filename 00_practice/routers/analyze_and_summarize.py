@@ -5,7 +5,7 @@ from services.analyze_and_summarize import perform_summary  # 요약 서비스
 
 router = APIRouter()
 
-@router.post("/analyze-and-summarize/")
+@router.post("/analyze-and-summarize")
 async def analyze_and_summarize(input: TextInput):
     # 감정 분석과 요약 수행
     sentiment = perform_sentiment_analysis(input.text)  # 입력 텍스트에 대해 감정 분석

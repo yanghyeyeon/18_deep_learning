@@ -11,31 +11,25 @@ summary_model_name = "eenzeenee/t5-base-korean-summarization"
 summarizer_tokenizer = AutoTokenizer.from_pretrained(summary_model_name)
 summarizer_model = AutoModelForSeq2SeqLM.from_pretrained(summary_model_name)
 
+# 번역 모델과 토크나이저 로드
+model_name = "facebook/nllb-200-distilled-600M"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
 def perform_sentiment_analysis(text: str) -> dict:
-    # 문장을 토큰화 
-    encoded_input = sentiment_tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=512)
-        
-    # 모델 예측 수행
-    output = sentiment_model(**encoded_input, return_dict=True)
-        
-    # logits 가져오기
-    scores = output.logits.view(-1).float()
-        
-    # 소프트맥스 변환
-    scores = torch.softmax(scores.detach(), dim=0).numpy()
+    # 텍스트를 토크나이즈하고 모델에 입력
+    inputs = tokenizer(text, return_tensors="pt", padding=True)
+
+    # 번역 수행
+    translated_tokens = model.generate(**inputs)
     
-    print("Scores:", scores)  # 스코어 로그 추가
-        
-    # 감정 레이블 확인
-    labels = ['Negative', 'Neutral', 'Positive']  # 실제 레이블에 맞게 조정
-        
-    # 결과 반환
-    # scores가 1차원 배열인지 확인
-    if scores.ndim == 1:  # 1차원 배열이면
-        return {labels[i]: scores[i].item() for i in range(len(scores))}
-    else:
-        return {"error": "Unexpected score format"}
+    # 번역된 텍스트 디코딩
+    english_translation = tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
+    
+    print(english_translation)
+
+    # 번역된 텍스트 디코딩
+    english_translation = tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
 
 def perform_summary(text: str) -> str:
     # 입력 텍스트를 토큰화

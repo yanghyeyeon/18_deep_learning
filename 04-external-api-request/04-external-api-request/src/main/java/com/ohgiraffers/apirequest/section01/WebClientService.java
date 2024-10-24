@@ -32,7 +32,7 @@ public class WebClientService {
     public ResponseDTO translateText(RequestDTO requestDTO) {
 
         ResponseDTO responseDTO = webClient.post()
-                .uri("/translate")
+                .uri("/analyze-and-summarize")
                 .bodyValue(requestDTO)
                 .retrieve() // 요청 보내기
                 .bodyToMono(ResponseDTO.class) // 응답 받을 값을 변환
