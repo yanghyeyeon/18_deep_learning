@@ -24,8 +24,11 @@ public class TransactionController {
 
     private final RestTemplateService restTemplateService;
 
-    public TransactionController(RestTemplateService restTemplateService) {
+    private final WebClientService webClientService;
+
+    public TransactionController(RestTemplateService restTemplateService, WebClientService webClientService) {
         this.restTemplateService = restTemplateService;
+        this.webClientService = webClientService;
     }
 
     @GetMapping("/test")
@@ -44,7 +47,18 @@ public class TransactionController {
 
         ResponseDTO result = restTemplateService.translateText(requestDTO);
 
-        return null;
+        return result;
+    }
+
+    @PostMapping("/webclient")
+    public ResponseDTO translateByWebClient(@RequestBody RequestDTO requestDTO){
+
+        log.info("번역[WebClient] Controller 요청 들어옴...");
+        log.info("text: {}, lang: {}", requestDTO.getText(), requestDTO.getLang());
+
+        ResponseDTO result = webClientService.translateText(requestDTO);
+
+        return result;
     }
 
 }

@@ -3,9 +3,9 @@ package com.ohgiraffers.apirequest.section01;
 import com.ohgiraffers.apirequest.section01.dto.RequestDTO;
 import com.ohgiraffers.apirequest.section01.dto.ResponseDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -40,10 +40,27 @@ public class RestTemplateService {
         // 1. HttpHeader
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
         // 2. requestBody
+        // HttpEntity = header + body
+        HttpEntity<RequestDTO> entity = new HttpEntity<>(requestDTO, headers);
+
         // 3. HTTP 메서드
         // 4. 응답을 받을 타입
+        try {
+            ResponseEntity<ResponseDTO> response = restTemplate.exchange(
+                FAST_API_SERVER_URL,    // 요청 url
+                    HttpMethod.POST,    // Http 요청 메서드
+                    entity,             // 요청 entity(헤더 + 본문)
+                    ResponseDTO.class   // 응답 본문을 반환할 타입(JSON -> ResponseDTO)
+            );
 
+            log.info("=== 번역 서비스 응답 데이터 ===");
+            log.info("번역 결과 : {}", response.getBody());
 
+            return response.getBody();
+        } catch (RestClientException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
