@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, T5Tokenizer, T5ForConditionalGeneration
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
 # 감정 분석 모델과 토크나이저 로드
@@ -8,8 +8,8 @@ sentiment_model = AutoModelForSequenceClassification.from_pretrained(sentiment_m
 
 # 요약 모델과 토크나이저 로드
 summary_model_name = "eenzeenee/t5-base-korean-summarization"
-summarizer_tokenizer = T5Tokenizer.from_pretrained(summary_model_name)
-summarizer_model = T5ForConditionalGeneration.from_pretrained(summary_model_name)
+summarizer_tokenizer = AutoTokenizer.from_pretrained(summary_model_name)
+summarizer_model = AutoModelForSeq2SeqLM.from_pretrained(summary_model_name)
 
 
 def perform_sentiment_analysis(text: str) -> dict:
@@ -24,6 +24,8 @@ def perform_sentiment_analysis(text: str) -> dict:
         
     # 소프트맥스 변환
     scores = torch.softmax(scores.detach(), dim=0).numpy()
+    
+    print("Scores:", scores)  # 스코어 로그 추가
         
     # 감정 레이블 확인
     labels = ['Negative', 'Neutral', 'Positive']  # 실제 레이블에 맞게 조정
@@ -35,15 +37,16 @@ def perform_sentiment_analysis(text: str) -> dict:
     else:
         return {"error": "Unexpected score format"}
 
-# def perform_summary(text: str) -> str:
-#     # 입력 텍스트를 토큰화
-#     inputs = summarizer_tokenizer("summarize: " + text, return_tensors="pt", max_length=512, truncation=True)
+def perform_summary(text: str) -> str:
+    # 입력 텍스트를 토큰화
+    inputs = summarizer_tokenizer("summarize: " + text, return_tensors="pt", max_length=512, truncation=True)
     
-#     # 모델을 통해 요약 생성
-#     with torch.no_grad():
-#         summary_ids = summarizer_model.generate(inputs["input_ids"], num_beams=4, max_length=150, early_stopping=True)
+    # 모델을 통해 요약 생성
+    with torch.no_grad():
+        summary_ids = summarizer_model.generate(inputs["input_ids"], num_beams=4, max_length=150, early_stopping=True)
     
-#     # 요약 결과 디코딩
-#     summary = summarizer_tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+    # 요약 결과 디코딩
+    summary = summarizer_tokenizer.decode(summary_ids[0], skip_special_tokens=True)
     
-#     return summary
+    return summary
+

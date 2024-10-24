@@ -9,11 +9,9 @@ router = APIRouter()
 async def analyze_and_summarize(input: TextInput):
     # 감정 분석과 요약 수행
     sentiment = perform_sentiment_analysis(input.text)  # 입력 텍스트에 대해 감정 분석
-    # summary = perform_summary(input.text)  # 입력 텍스트에 대해 요약
-    
-    print(f"Input text: {input.text} (type: {type(input.text).__name__})")  # 타입 확인
+    summary = perform_summary(input.text)  # 입력 텍스트에 대해 요약
     
     return {
-        "summary": "summary",
+        "summary": summary,
         "sentiment": sentiment
     }
