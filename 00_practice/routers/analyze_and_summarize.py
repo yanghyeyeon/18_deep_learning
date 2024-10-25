@@ -10,10 +10,8 @@ async def analyze_and_summarize(input: TextInput):
     # 감정 분석과 요약 수행
     sentiment = perform_sentiment_analysis(input.text)  # 입력 텍스트에 대해 감정 분석
     summary = perform_summary(input.text)  # 입력 텍스트에 대해 요약
-    # translate = translate_text(input.text)
     
     return {
         "summary": summary,
         "sentiment": sentiment
-        # "translate": translate
     }
