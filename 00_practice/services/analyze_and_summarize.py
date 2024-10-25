@@ -1,8 +1,9 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoTokenizer, AutoModelForSeq2SeqLM
-import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
+from scipy.special import softmax
+import torch, numpy as np
 
 # 감정 분석 모델과 토크나이저 로드
-sentiment_model_name = "Dongjin-kr/ko-reranker"
+sentiment_model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 sentiment_tokenizer = AutoTokenizer.from_pretrained(sentiment_model_name)
 sentiment_model = AutoModelForSequenceClassification.from_pretrained(sentiment_model_name)
 
@@ -11,25 +12,44 @@ summary_model_name = "eenzeenee/t5-base-korean-summarization"
 summarizer_tokenizer = AutoTokenizer.from_pretrained(summary_model_name)
 summarizer_model = AutoModelForSeq2SeqLM.from_pretrained(summary_model_name)
 
-# 번역 모델과 토크나이저 로드
-model_name = "facebook/nllb-200-distilled-600M"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
-def perform_sentiment_analysis(text: str) -> dict:
-    # 텍스트를 토크나이즈하고 모델에 입력
-    inputs = tokenizer(text, return_tensors="pt", padding=True)
+translator = pipeline(
+    'translation',
+    model='facebook/nllb-200-distilled-600M',
+    device=-1,
+    src_lang='kor_Hang',
+    tgt_lang='eng_Latn',
+    max_length=256
+)
 
+
+def preprocess(text):
+    new_text = []
+    for t in text.split(" "):
+        t = '@user' if t.startswith('@') and len(t) > 1 else t
+        t = 'http' if t.startswith('http') else t
+        new_text.append(t)
+    return " ".join(new_text)
+
+# 번역후 감정 분석
+def perform_sentiment_analysis(text: str):
     # 번역 수행
-    translated_tokens = model.generate(**inputs)
-    
-    # 번역된 텍스트 디코딩
-    english_translation = tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
-    
-    print(english_translation)
+    translated_text = translator(text)[0]['translation_text']
 
-    # 번역된 텍스트 디코딩
-    english_translation = tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
+    # 번역된 텍스트를 감정 분석에 맞게 전처리 및 토큰화
+    encoded_input = sentiment_tokenizer(translated_text, return_tensors='pt')
+    
+    # 모델을 사용하여 감정 분석 수행
+    output = sentiment_model(**encoded_input)
+    scores = output[0][0].detach().numpy()
+    scores = softmax(scores)
+
+    # 감정 점수 랭킹 출력
+    ranking = np.argsort(scores)[::-1]
+    for i in range(scores.shape[0]):
+        label = sentiment_model.config.id2label[ranking[i]]
+        score = scores[ranking[i]]
+        return f"{i+1}) {label} {np.round(float(score), 4)}"
 
 def perform_summary(text: str) -> str:
     # 입력 텍스트를 토큰화
